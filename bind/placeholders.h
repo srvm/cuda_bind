@@ -18,6 +18,16 @@ namespace placeholders {
     }
   };
 
+  template<typename T>
+  struct is_placeholder {
+    static constexpr bool value = false;
+  };
+
+  template<int i>
+  struct is_placeholder<__placeholder<i>> {
+    static constexpr bool value = true;
+  };
+
 #ifdef __CUDA_ARCH__
   static const __device__ __placeholder<1> _1;
   static const __device__ __placeholder<2> _2;

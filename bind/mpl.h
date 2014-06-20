@@ -3,6 +3,9 @@
 namespace cb {
 namespace mpl {
 
+  // apply_from_tuple code derived from this Stack Overflow thread:
+  // http://stackoverflow.com/questions/7858817/unpacking-a-tuple-to-call-a-matching-function-pointer
+
   template<int...>
   struct indices {};
 
