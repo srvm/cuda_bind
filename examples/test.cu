@@ -1,12 +1,15 @@
 #include <iostream>
 #include <bind/bind.h>
 
+using namespace cb::placeholders;
+
+__global__ void entry_point() {
+  auto foo = [](int x, int y) { return x + y; };
+  auto foo2 = cb::bind(foo, _1, 2);
+}
+
 int main()
 {
-  using namespace thrust::bind;
-  using namespace thrust::bind::placeholders;
-
-  std::cout << decltype(_4)::value << std::endl;
-
+  entry_point<<<1,1>>>();
   return 0;
 }
