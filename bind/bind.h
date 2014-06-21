@@ -59,6 +59,7 @@ namespace detail {
 
   template<typename F, typename... Args>
   struct __bind {
+    typedef typename std::decay<F>::type F_decay;
     typedef thrust::tuple<typename std::decay<Args>::type...> args_tuple_type;
 
     __host__ __device__
@@ -72,11 +73,11 @@ namespace detail {
 
       return mpl::apply_from_tuple(m_fn,
           detail::xform_placeholder_tuple<_args_tuple_type, typename std::decay<Args>::type...>::
-          apply(m_args, thrust::make_tuple(args...)));
+          apply(m_args, thrust::make_tuple(std::forward<_Args>(args)...)));
     }
 
   private:
-    typename std::decay<F>::type m_fn;
+    F_decay m_fn;
     args_tuple_type m_args;
   };
 
