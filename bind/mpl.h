@@ -1,7 +1,7 @@
 #pragma once
 
 namespace cb {
-namespace mpl {
+namespace old_mpl {
 
   // apply_from_tuple code derived from this Stack Overflow thread:
   // http://stackoverflow.com/questions/7858817/unpacking-a-tuple-to-call-a-matching-function-pointer
@@ -55,12 +55,29 @@ namespace mpl {
     }
   };
 
-  template<typename T1, typename T2>
+  /*template<typename T1, typename T2>
   __host__ __device__
   typename __tuple_cat<T1, T2>::type
   tuple_cat(T1 t1, T2 t2) {
     //return __tuple_cat<T1, T2>::apply(t1, t2);
-  }
+  }*/
+
+} // namespace mpl
+
+namespace mpl {
+
+  template<typename F, typename A0>
+  __host__ __device__
+  typename std::result_of<F(A0)>::type
+  apply_from_tuple(F f, thrust::tuple<A0> a)
+  { return f(thrust::get<0>(a)); }
+
+  template<typename F, typename A0, typename A1>
+  __host__ __device__
+  typename std::result_of<F(A0, A1)>::type
+  apply_from_tuple(F f, thrust::tuple<A0, A1> a)
+  { return f(thrust::get<0>(a),
+             thrust::get<1>(a)); }
 
 } // namespace mpl
 } // namespace cb

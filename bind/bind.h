@@ -8,6 +8,7 @@
 
 #include "mpl.h"
 #include "placeholders.h"
+#include "tuple_cat.h"
 
 namespace cb {
 namespace detail {
@@ -18,7 +19,7 @@ namespace detail {
     typedef typename thrust::tuple_element<P::value, Env>::type type;
 
     __host__ __device__
-    static auto apply(P&& arg, Env env) -> decltype(arg(env))
+    static auto apply(P arg, Env env) -> decltype(arg(env))
     { return arg(env); }
   };
 
@@ -27,7 +28,7 @@ namespace detail {
     typedef P type;
 
     __host__ __device__
-    static P apply(P&& arg, Env env)
+    static P apply(P arg, Env env)
     { return arg; }
   };
 
@@ -41,9 +42,18 @@ namespace detail {
       typedef typename arg_type::head_type HT;
       typedef typename arg_type::tail_type TT;
 
-      /*return mpl::tuple_cat(xform_placeholder<HT, Env>::apply(formal.get_head(), actual),
-                            xform_placeholder_tuple<TT, Env>::apply(formal.get_tail(), actual));*/
+      return thrust::tuple_cat(xform_placeholder<HT, Env>::apply(formal.get_head(), actual),
+                               xform_placeholder_tuple<TT, Env>::apply(formal.get_tail(), actual));
     }
+  };
+
+  template<typename Env, typename T>
+  struct xform_placeholder_tuple<Env, thrust::tuple<T>> {
+    typedef thrust::tuple<typename xform_placeholder<T, Env>::type> type;
+
+    __host__ __device__
+    static type apply(thrust::tuple<T> formal, Env actual)
+    { return thrust::make_tuple(xform_placeholder<T, Env>::apply(formal.get_head(), actual)); }
   };
 }
 
@@ -58,15 +68,11 @@ namespace detail {
     template<typename... _Args>
     __host__ __device__ typename F::result_type
     operator()(_Args&&... args) {
-      //detail::replace_placeholders(m_args, thrust::make_tuple(args...));
-      //return mpl::apply_from_tuple(m_fn, __replace_placeholders<_Args...>(std::forward<_Args>(args)...));
-
       typedef thrust::tuple<typename std::decay<_Args>::type...> _args_tuple_type;
-      mpl::tuple_cat<thrust::tuple<int>, thrust::tuple<int>>(thrust::make_tuple(1), thrust::make_tuple(2));
-      /*mpl::apply_from_tuple(
-          m_fn, thrust::make_tuple(2, 2));*/
-          /*detail::xform_placeholder_tuple<_args_tuple_type, typename std::decay<Args>::type...>::
-          apply(m_args, thrust::make_tuple(args...)));*/
+
+      return mpl::apply_from_tuple(m_fn,
+          detail::xform_placeholder_tuple<_args_tuple_type, typename std::decay<Args>::type...>::
+          apply(m_args, thrust::make_tuple(args...)));
     }
 
   private:

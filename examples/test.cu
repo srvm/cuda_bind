@@ -1,5 +1,7 @@
 #include <iostream>
 #include <functional>
+
+#include <thrust/device_vector.h>
 #include <bind/bind.h>
 
 using namespace cb::placeholders;
@@ -13,14 +15,18 @@ struct op_sum {
   { return x + y; }
 };
 
-__global__ void entry_point() {
+template<typename C>
+__global__ void entry_point(C& c) {
   //auto sum = [](int x, int y) { return x + y; };
   auto foo = cb::bind(op_sum<int>(), _1, 2);
-  foo(2);
+  auto x = foo(2);
+  printf("%d\n", x);
 }
 
 int main()
 {
-  entry_point<<<1,1>>>();
+  thrust::device_vector<int> d_vector(10);
+  entry_point<<<1,1>>>(d_vector);
+
   return 0;
 }
