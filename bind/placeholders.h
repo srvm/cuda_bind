@@ -9,12 +9,12 @@ namespace placeholders {
 
     template<typename... Args>
     __host__ __device__
-    typename thrust::tuple_element<i, thrust::tuple<Args...>>::type
-    operator()(Args... args) {
+    typename thrust::tuple_element<i, thrust::tuple<typename std::decay<Args>::type...>>::type
+    operator()(Args&&... args) const {
       using namespace thrust;
 
-      typedef typename tuple_element<i, tuple<Args...>>::type arg_type;
-      return get<i>(make_tuple(args...));
+      typedef typename tuple_element<i, tuple<typename std::decay<Args>...>>::type arg_type;
+      return get<i>(make_tuple(std::forward<Args>(args)...));
     }
   };
 
