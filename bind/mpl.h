@@ -25,10 +25,41 @@ namespace mpl {
   }
 
   template<typename F, typename... S>
-  typename std::result_of<F(S...)>::type
   __host__ __device__
+  typename std::result_of<F(S...)>::type
   apply_from_tuple(F f, thrust::tuple<S...> s) {
     return __delayed_dispatch(f, s, typename gen<sizeof... (S)>::type());
+  }
+
+  template<typename T1, typename T2>
+  struct __tuple_cat {};
+
+  template<typename... _T1, typename... _T2>
+  struct __tuple_cat<thrust::tuple<_T1...>, thrust::tuple<_T2...>> {
+    typedef thrust::tuple<_T1..., _T2...> type;
+
+    __host__ __device__
+    static type apply(thrust::tuple<_T1...> t1, thrust::tuple<_T2...> t2) {
+      return __delayed_apply(t1, t2,
+                             typename gen<sizeof... (_T1)>::type(),
+                             typename gen<sizeof... (_T2)>::type());
+    }
+
+    template<int... I1, int... I2>
+    __host__ __device__
+    static type __delayed_apply(thrust::tuple<_T1...> t1,
+                                thrust::tuple<_T2...> t2,
+                                indices<I1...>, indices<I2...>) {
+      return thrust::make_tuple(thrust::get<I1>(t1)...,
+                                thrust::get<I2>(t2)...);
+    }
+  };
+
+  template<typename T1, typename T2>
+  __host__ __device__
+  typename __tuple_cat<T1, T2>::type
+  tuple_cat(T1 t1, T2 t2) {
+    //return __tuple_cat<T1, T2>::apply(t1, t2);
   }
 
 } // namespace mpl
