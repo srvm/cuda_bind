@@ -5,10 +5,10 @@
 #include <thrust/tuple.h>
 #include <thrust/detail/type_traits.h>
 #include <thrust/detail/tuple_meta_transform.h>
+#include <thrust/detail/tuple_cat.h>
 
 #include "mpl.h"
 #include "placeholders.h"
-#include "tuple_cat.h"
 
 namespace cb {
 namespace detail {
