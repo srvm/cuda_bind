@@ -16,6 +16,9 @@ namespace detail {
   template<typename P, typename Env,
            bool _is_placeholder = placeholders::is_placeholder<P>::value>
   struct xform_placeholder {
+    static_assert(P::value < thrust::tuple_size<Env>::value,
+        "Error: Placeholder does not point to anything");
+
     typedef typename thrust::tuple_element<P::value, Env>::type type;
 
     __host__ __device__

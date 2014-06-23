@@ -26,15 +26,19 @@ struct op_subtract {
 
 template<typename C>
 __global__ void entry_point(C& c) {
-  auto foo = cb::bind(op_subtract<int>(), _2, _1);
-  auto x = foo(2, 4);
-  printf("%d\n", x);
+  /*auto foo = cb::bind(op_subtract<int>(), _1, 4);
+  auto x = foo(4);
+  printf("%d\n", x);*/
 }
 
 int main()
 {
   thrust::device_vector<int> d_vector(10);
   entry_point<<<1,1>>>(d_vector);
+
+  auto foo = cb::bind(op_subtract<int>(), _2, _1);
+  auto x = foo(2, 4);
+  printf("%d\n", x);
 
   return 0;
 }
