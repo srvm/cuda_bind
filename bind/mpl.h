@@ -1,7 +1,7 @@
 #pragma once
 
 namespace cb {
-namespace old_mpl {
+namespace mpl {
 
   // apply_from_tuple code derived from this Stack Overflow thread:
   // http://stackoverflow.com/questions/7858817/unpacking-a-tuple-to-call-a-matching-function-pointer
@@ -20,17 +20,24 @@ namespace old_mpl {
   template<typename F, typename T, int... I>
   __host__ __device__
   auto __delayed_dispatch(F f, T t, indices<I...>) ->
-  decltype(f(thrust::get<I>(t)...)) {
-    return f(thrust::get<I>(t)...);
+  decltype(f(thrust::get<I>(t)...))
+  { return f(thrust::get<I>(t)...); }
+
+  template<typename F, typename T>
+  __host__ __device__ typename F::result_type
+  apply_from_tuple(F f, T t) {
+    return __delayed_dispatch(f, t,
+        typename gen<thrust::tuple_size<T>::value>::type());
   }
 
-  template<typename F, typename... S>
-  __host__ __device__
-  typename std::result_of<F(S...)>::type
-  apply_from_tuple(F f, thrust::tuple<S...> s) {
-    return __delayed_dispatch(f, s, typename gen<sizeof... (S)>::type());
+  template<typename R, typename F, typename T>
+  __host__ __device__ R
+  apply_from_tuple(F f, T t) {
+    return __delayed_dispatch(f, t,
+        typename gen<thrust::tuple_size<T>::value>::type());
   }
 
+#if 0
   template<typename T1, typename T2>
   struct __tuple_cat {};
 
@@ -55,29 +62,13 @@ namespace old_mpl {
     }
   };
 
-  /*template<typename T1, typename T2>
+  template<typename T1, typename T2>
   __host__ __device__
   typename __tuple_cat<T1, T2>::type
   tuple_cat(T1 t1, T2 t2) {
     //return __tuple_cat<T1, T2>::apply(t1, t2);
-  }*/
-
-} // namespace mpl
-
-namespace mpl {
-
-  template<typename F, typename A0>
-  __host__ __device__
-  typename std::result_of<F(A0)>::type
-  apply_from_tuple(F f, thrust::tuple<A0> a)
-  { return f(thrust::get<0>(a)); }
-
-  template<typename F, typename A0, typename A1>
-  __host__ __device__
-  typename std::result_of<F(A0, A1)>::type
-  apply_from_tuple(F f, thrust::tuple<A0, A1> a)
-  { return f(thrust::get<0>(a),
-             thrust::get<1>(a)); }
+  }
+#endif
 
 } // namespace mpl
 } // namespace cb
