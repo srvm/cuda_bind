@@ -12,14 +12,22 @@ struct op_sum {
 
   __host__ __device__
   T operator()(T x, T y)
-  { return x + y; }
+  { return x - y; }
+};
+
+template<typename T>
+struct op_subtract {
+  typedef T result_type;
+
+  __host__ __device__
+  T operator()(T x, T y)
+  { return x - y; }
 };
 
 template<typename C>
 __global__ void entry_point(C& c) {
-  //auto sum = [](int x, int y) { return x + y; };
-  auto foo = cb::bind(op_sum<int>(), _1, 2);
-  auto x = foo(2);
+  auto foo = cb::bind(op_subtract<int>(), _2, _1);
+  auto x = foo(2, 4);
   printf("%d\n", x);
 }
 

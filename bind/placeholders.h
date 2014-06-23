@@ -7,15 +7,10 @@ namespace placeholders {
   struct __placeholder : public thrust::detail::integral_constant<int, i> {
     __host__ __device__ __placeholder() {}
 
-    template<typename... Args>
+    template<typename T>
     __host__ __device__
-    typename thrust::tuple_element<i, thrust::tuple<typename std::decay<Args>::type...>>::type
-    operator()(Args&&... args) const {
-      using namespace thrust;
-
-      typedef typename tuple_element<i, tuple<typename std::decay<Args>...>>::type arg_type;
-      return get<i>(make_tuple(std::forward<Args>(args)...));
-    }
+    typename thrust::tuple_element<i, T>::type operator()(T t)
+    { return thrust::get<i>(t); }
   };
 
   template<typename T>
