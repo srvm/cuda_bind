@@ -62,7 +62,7 @@ namespace detail {
   };
 }
 
-  template<typename F, typename... Args>
+  template<typename R, typename F, typename... Args>
   struct __bind {
     typedef typename std::decay<F>::type F_decay;
     typedef thrust::tuple<typename std::decay<Args>::type...> args_tuple_type;
@@ -72,15 +72,15 @@ namespace detail {
       m_fn(f), m_args(args...) {}
 
     template<typename... _Args>
-    __host__ __device__ typename F::result_type
-    operator()(_Args&&... args) {
+    __host__ __device__
+    R operator()(_Args&&... args) {
       typedef thrust::tuple<typename std::decay<_Args>::type...> _args_tuple_type;
 
       auto value_tuple = detail::xform_placeholder_tuple<_args_tuple_type,
            typename std::decay<Args>::type...>::apply(
                m_args, thrust::make_tuple(std::forward<_Args>(args)...));
 
-      return mpl::apply_from_tuple(m_fn, value_tuple);
+      return mpl::apply_from_tuple<R>(m_fn, value_tuple);
     }
 
   private:
@@ -90,8 +90,16 @@ namespace detail {
 
   template<typename F, typename... Args>
   __host__ __device__
-  __bind<F, Args...>
+  __bind<typename F::result_type, F, Args...>
   bind(F&& f, Args&&... args) {
-    return __bind<F, Args...>(std::forward<F>(f), std::forward<Args>(args)...);
+    return __bind<typename F::result_type, F, Args...>
+      (std::forward<F>(f), std::forward<Args>(args)...);
+  }
+
+  template<typename R, typename F, typename... Args>
+  __host__ __device__
+  __bind<R, F, Args...> bind(F&& f, Args&&... args) {
+    return __bind<R, F, Args...>
+      (std::forward<F>(f), std::forward<Args>(args)...);
   }
 } // namespace cb

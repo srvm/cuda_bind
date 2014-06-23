@@ -20,19 +20,19 @@ namespace mpl {
   template<typename F, typename T, int... I>
   __host__ __device__
   auto __delayed_dispatch(F f, T t, indices<I...>) ->
-  decltype(f(thrust::get<I>(t)...))
+    decltype(f(thrust::get<I>(t)...))
   { return f(thrust::get<I>(t)...); }
 
   template<typename F, typename T>
-  __host__ __device__ typename F::result_type
-  apply_from_tuple(F f, T t) {
+  __host__ __device__
+  typename F::result_type apply_from_tuple(F f, T t) {
     return __delayed_dispatch(f, t,
         typename gen<thrust::tuple_size<T>::value>::type());
   }
 
   template<typename R, typename F, typename T>
-  __host__ __device__ R
-  apply_from_tuple(F f, T t) {
+  __host__ __device__
+  R apply_from_tuple(F f, T t) {
     return __delayed_dispatch(f, t,
         typename gen<thrust::tuple_size<T>::value>::type());
   }
