@@ -37,7 +37,6 @@ namespace mpl {
         typename gen<thrust::tuple_size<T>::value>::type());
   }
 
-#if 0
   template<typename T1, typename T2>
   struct __tuple_cat {};
 
@@ -65,10 +64,8 @@ namespace mpl {
   template<typename T1, typename T2>
   __host__ __device__
   typename __tuple_cat<T1, T2>::type
-  tuple_cat(T1 t1, T2 t2) {
-    //return __tuple_cat<T1, T2>::apply(t1, t2);
-  }
-#endif
+  tuple_cat(T1 t1, T2 t2)
+  { return __tuple_cat<T1, T2>::apply(t1, t2); }
 
 } // namespace mpl
 } // namespace cb

@@ -26,8 +26,8 @@ struct op_subtract {
 
 template<typename C>
 __global__ void entry_point(C& c) {
-  auto foo = cb::bind(op_subtract<int>(), _1, 4);
-  auto x = foo(4);
+  auto foo = cb::bind(op_subtract<int>(), 4, 1);
+  auto x = foo();
   printf("%d\n", x);
 }
 

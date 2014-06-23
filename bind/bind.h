@@ -83,6 +83,14 @@ namespace detail {
       return mpl::apply_from_tuple<R>(m_fn, value_tuple);
     }
 
+    __host__ __device__
+    R operator()() {
+      static_assert(!placeholders::has_placeholder<args_tuple_type>::value,
+          "One or more placeholders could not be bound");
+
+      return mpl::apply_from_tuple<R>(m_fn, m_args);
+    }
+
   private:
     F_decay m_fn;
     args_tuple_type m_args;

@@ -23,6 +23,20 @@ namespace placeholders {
     static constexpr bool value = true;
   };
 
+  template<typename T>
+  struct has_placeholder {
+    typedef typename T::head_type THT;
+    typedef typename T::tail_type TTT;
+
+    static constexpr bool value = is_placeholder<THT>::value ||
+      has_placeholder<TTT>::value;
+  };
+
+  template<typename _T>
+  struct has_placeholder<thrust::detail::cons<_T, thrust::null_type>> {
+    static constexpr bool value = is_placeholder<_T>::value;
+  };
+
 #ifdef __CUDA_ARCH__
   static const __device__ __placeholder<0> _1;
   static const __device__ __placeholder<1> _2;
