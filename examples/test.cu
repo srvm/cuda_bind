@@ -1,5 +1,4 @@
 #include <iostream>
-#include <functional>
 
 #include <thrust/device_vector.h>
 #include <bind/bind.h>

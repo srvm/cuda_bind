@@ -1,10 +1,8 @@
 #pragma once
 
-#include <type_traits>
 #include <functional>
+
 #include <thrust/tuple.h>
-#include <thrust/detail/type_traits.h>
-#include <thrust/detail/tuple_meta_transform.h>
 #include <thrust/detail/tuple_cat.h>
 
 #include "mpl.h"
