@@ -96,6 +96,13 @@ namespace detail {
     args_tuple_type m_args;
   };
 
+  template<typename R, typename F, typename... Args>
+  __host__ __device__
+  __bind<R, F, Args...> bind(F&& f, Args&&... args) {
+    return __bind<R, F, Args...>
+      (std::forward<F>(f), std::forward<Args>(args)...);
+  }
+
   template<typename F, typename... Args>
   __host__ __device__
   __bind<typename F::result_type, F, Args...>
@@ -104,9 +111,12 @@ namespace detail {
       (std::forward<F>(f), std::forward<Args>(args)...);
   }
 
-  template<typename R, typename F, typename... Args>
+  template<typename R, typename... F_Args, typename... Args>
   __host__ __device__
-  __bind<R, F, Args...> bind(F&& f, Args&&... args) {
+  __bind<R, R (*)(F_Args...), Args...>
+  bind(R (*f)(F_Args...), Args&&... args) {
+    typedef R (*F)(F_Args...);
+
     return __bind<R, F, Args...>
       (std::forward<F>(f), std::forward<Args>(args)...);
   }

@@ -24,10 +24,17 @@ struct op_subtract {
   { return x - y; }
 };
 
+__device__ int subtract(int x, int y)
+{ return x - y; }
+
 template<typename C>
 __global__ void entry_point(C& c) {
-  auto foo = cb::bind(op_subtract<int>(), 4, 1);
-  auto x = foo();
+  auto subtract_lambda = [](int x, int y) { return x - y; };
+
+  //auto foo = cb::bind(op_subtract<int>(), 1, 2);
+  auto foo = cb::bind(subtract, 2, _1);
+  //auto foo = cb::bind(subtract_lambda, 2, 1);
+  auto x = foo(1);
   printf("%d\n", x);
 }
 
