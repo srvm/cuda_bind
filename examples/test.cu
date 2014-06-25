@@ -23,28 +23,27 @@ struct op_subtract {
   { return x - y; }
 };
 
-__device__ int subtract(int x, int y)
-{ return x - y; }
+__host__ __device__
+int subtract(int x, int y) { return x - y; }
 
-template<typename C>
-__global__ void entry_point(C& c) {
-  auto subtract_lambda = [](int x, int y) { return x - y; };
+template<typename F, typename T>
+__global__ void entry_point(F f, T t) {
+  //auto subtract_lambda = [](int x, int y) { return x - y; };
 
   //auto foo = cb::bind(op_subtract<int>(), 1, 2);
-  auto foo = cb::bind(subtract, 2, _1);
+  //auto foo = cb::bind(subtract, _2, _1);
   //auto foo = cb::bind(subtract_lambda, 2, 1);
-  auto x = foo(1);
+
+  auto x = f(2);
   printf("%d\n", x);
 }
 
 int main()
 {
-  thrust::device_vector<int> d_vector(10);
-  entry_point<<<1,1>>>(d_vector);
+  thrust::device_vector<int> d(100);
 
-  /*auto foo = cb::bind(op_subtract<int>(), 2, 1);
-  auto x = foo(2, 4);
-  printf("%d\n", x);*/
+  auto foo = cb::bind(op_subtract<int>(), 2, _1);
+  entry_point<<<1,1>>>(foo, d);
 
   return 0;
 }
