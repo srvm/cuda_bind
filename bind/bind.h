@@ -20,10 +20,8 @@ namespace detail {
   template<typename P, typename Env,
            bool _is_placeholder = placeholders::is_placeholder<P>::value>
   struct xform_placeholder {
-    static_assert(P::value < thrust::tuple_size<Env>::value,
-        "Error: Placeholder does not point to anything");
-
-    typedef typename thrust::tuple_element<P::value, Env>::type type;
+    //typedef typename thrust::tuple_element<P::value, Env>::type type;
+    typedef typename P::template result_type<Env> type;
 
     __host__ __device__
     static type apply(P arg, Env env)
@@ -97,6 +95,38 @@ namespace detail {
     T m_args;
   };
 
+  // Function pointers
+  template<typename R, typename... F_Args, typename... Args>
+  __host__ __device__
+  auto bind(R (*f)(F_Args...), Args&&... args) ->
+  __bind<R, R (*)(F_Args...), __VTT(Args, args)> {
+    using namespace thrust;
+    typedef R (*F)(F_Args...);
+
+    return __bind<R, F, __VTT(Args, args)>
+      (std::forward<F>(f), make_tuple(std::forward<Args>(args)...));
+  }
+
+  // Pointer to class member function
+  template<typename C, typename R, typename... F_Args, typename... Args>
+  __host__ __device__
+  auto bind(R (C::*f)(F_Args...), Args&&... args) ->
+  __bind<R, R (C::*)(F_Args...), __VTT(Args, args)> {
+    using namespace thrust;
+    typedef R (C::*F)(F_Args...);
+
+    return __bind<R, F, __VTT(Args, args)>
+      (std::forward<F>(f), make_tuple(std::forward<Args>(args)...));
+  }
+
+  template<typename F, typename T>
+  __host__ __device__
+  __bind<typename F::result_type, F, T>
+  bind_tuple(F&& f, T args) {
+    return __bind<typename F::result_type, F, T>
+      (std::forward<F>(f), args);
+  }
+
   template<typename R, typename F, typename... Args>
   __host__ __device__
   auto bind(F&& f, Args&&... args) ->
@@ -113,14 +143,4 @@ namespace detail {
       (std::forward<F>(f), thrust::make_tuple(std::forward<Args>(args)...));
   }
 
-  template<typename R, typename... F_Args, typename... Args>
-  __host__ __device__
-  auto bind(R (*f)(F_Args...), Args&&... args) ->
-  __bind<R, R (*)(F_Args...), __VTT(Args, args)> {
-    using namespace thrust;
-    typedef R (*F)(F_Args...);
-
-    return __bind<R, F, __VTT(Args, args)>
-      (std::forward<F>(f), make_tuple(std::forward<Args>(args)...));
-  }
 } // namespace cb

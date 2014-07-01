@@ -1,6 +1,17 @@
 #pragma once
 
 namespace cb {
+
+#define __CHECK_NESTED_TYPE(is_nested_type, check_type) \
+  template<typename S> \
+  struct check_type { \
+    template<typename U> \
+    static constexpr char check(typename U::is_nested_type* ); \
+    template<typename U> \
+    static constexpr long check(U* ); \
+    static constexpr bool value = (sizeof(check<S>(0)) == sizeof(char)); \
+  };
+
 namespace mpl {
 
   // apply_from_tuple code derived from this Stack Overflow thread:

@@ -1,27 +1,32 @@
 #pragma once
 
+#include "mpl.h"
+
 namespace cb {
 namespace placeholders {
 
   template<int i>
-  struct __placeholder : public thrust::detail::integral_constant<int, i> {
+  struct __placeholder {
+    typedef void __is_placeholder;
+    template<typename T>
+    using result_type = typename thrust::tuple_element<i, T>::type;
+
     __host__ __device__ __placeholder() {}
 
     template<typename T>
     __host__ __device__
-    typename thrust::tuple_element<i, T>::type operator()(T t)
-    { return thrust::get<i>(t); }
+    typename thrust::tuple_element<i, T>::type operator()(T t) {
+      static_assert(i < thrust::tuple_size<T>::value,
+          "Error: Placeholder does not point to anything");
+      return thrust::get<i>(t);
+    }
   };
 
-  template<typename T>
-  struct is_placeholder {
-    static constexpr bool value = false;
-  };
+  // Allow user-defined placeholders by having
+  // an '__is_placeholder' type inside.
+  __CHECK_NESTED_TYPE(__is_placeholder, check_placeholder);
 
-  template<int i>
-  struct is_placeholder<__placeholder<i>> {
-    static constexpr bool value = true;
-  };
+  template<typename T> using is_placeholder = check_placeholder<T>;
 
   template<typename T>
   struct has_placeholder {

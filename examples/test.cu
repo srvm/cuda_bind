@@ -28,13 +28,14 @@ int subtract(int x, int y) { return x - y; }
 
 template<typename F, typename T>
 __global__ void entry_point(F f, T t) {
-  //auto subtract_lambda = [](int x, int y) { return x - y; };
+  auto subtract_lambda = [](int x, int y) { return x - y; };
 
   //auto foo = cb::bind(op_subtract<int>(), 1, 2);
-  //auto foo = cb::bind(subtract, _2, _1);
+  auto foo = cb::bind(subtract, _2, _1);
   //auto foo = cb::bind(subtract_lambda, 2, 1);
 
-  auto x = f(2);
+  //auto x = f(2);
+  auto x = foo(2, 1);
   printf("%d\n", x);
 }
 
