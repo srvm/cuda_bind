@@ -31,7 +31,7 @@ namespace mpl {
   template<typename F, typename T, int... I>
   __host__ __device__
   auto __delayed_dispatch(F f, T t, indices<I...>) ->
-    decltype(f(thrust::get<I>(t)...))
+  decltype(f(thrust::get<I>(t)...))
   { return f(thrust::get<I>(t)...); }
 
   template<typename F, typename T>

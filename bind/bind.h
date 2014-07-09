@@ -37,7 +37,8 @@ namespace detail {
     { return arg; }
   };
 
-  template<typename T, typename Env>
+  template<typename T, typename Env,
+           int size = thrust::tuple_size<T>::value>
   struct xform_placeholder_tuple {
     template<typename _T> using xform_bound = xform_placeholder<_T, Env>;
     typedef typename thrust::detail::tuple_meta_transform<T, xform_bound>::type type;
@@ -54,13 +55,23 @@ namespace detail {
     }
   };
 
-  template<typename _T, typename Env>
+  /*template<typename _T, typename Env>
   struct xform_placeholder_tuple<thrust::detail::cons<_T, thrust::null_type>, Env> {
     typedef thrust::tuple<typename xform_placeholder<_T, Env>::type> type;
 
     __host__ __device__
     static type apply(thrust::detail::cons<_T, thrust::null_type> formal, Env actual)
     { return thrust::make_tuple(xform_placeholder<_T, Env>::apply(formal.get_head(), actual)); }
+  };*/
+
+  template<typename T, typename Env>
+  struct xform_placeholder_tuple<T, Env, 1> {
+    typedef typename thrust::tuple_element<0, T>::type _T;
+    typedef thrust::tuple<typename xform_placeholder<_T, Env>::type> type;
+
+    __host__ __device__
+    static type apply(T formal, Env actual)
+    { return thrust::make_tuple(xform_placeholder<_T, Env>::apply(thrust::get<0>(formal), actual)); }
   };
 }
 
