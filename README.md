@@ -1,7 +1,7 @@
-cuda_bind
+CUDA Bind
 =========
 
-A version of `bind` that works from within both host and CUDA device code. Uses `thrust::tuple`.
+A version of `bind` for CUDA. Works from within both host and device code, and can handle `__device__` and `__host__ __device__` lambdas.
 
 Example code:
 
